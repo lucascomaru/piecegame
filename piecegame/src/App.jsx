@@ -1,4 +1,3 @@
-import React from "react";
 import EscolherPuzzle from "./components/EscolherPuzzle";
 
 const imagens = [
@@ -7,8 +6,6 @@ const imagens = [
   "https://via.placeholder.com/150",
   "https://via.placeholder.com/150",
   "https://via.placeholder.com/150",
-  "https://via.placeholder.com/150",
-  
 ];
 
 const App = () => {
