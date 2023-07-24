@@ -20,17 +20,25 @@ const EscolherPuzzle = ({ imagens, onSelectPuzzle }) => {
     <div className="escolher-puzzle">
       <div className="imagens-container">
         {imagens.map((image, index) => (
-          <img
+          <a
             key={index}
-            src={image}
-            alt={`Imagem ${index + 1}`}
+            href="#"
             onClick={() => handleImageClick(image)}
             className={selectedImage === image ? "selected" : ""}
-          />
+          >
+            <img src={image} alt={`Paisagem ${index + 1}`} />
+          </a>
         ))}
       </div>
       <h2>Selecione uma imagem para começarmos o jogo</h2>
-      <button onClick={handleIniciarClick}>Iniciar o Jogo</button>
+      {selectedImage && (
+        <p className="mensagem-instrucao">
+          Você selecionou a imagem. Clique em "Iniciar o Jogo" para começar!
+        </p>
+      )}
+      <button onClick={handleIniciarClick} disabled={!selectedImage}>
+        Iniciar o Jogo
+      </button>
     </div>
   );
 };
