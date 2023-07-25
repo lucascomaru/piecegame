@@ -2,11 +2,19 @@ import { useState, useEffect } from "react";
 import "./Tabuleiro.css";
 
 const Tabuleiro = ({ imagem }) => {
-  const initialPuzzle = Array.from({ length: 16 }, (_, index) => index + 1);
-
-  const [puzzle, setPuzzle] = useState(initialPuzzle);
+  const [puzzle, setPuzzle] = useState([]);
   const [seconds, setSeconds] = useState(0);
   const [isActive, setIsActive] = useState(false);
+  const [selectedTile, setSelectedTile] = useState(null);
+
+  useEffect(() => {
+    const initialPuzzle = Array.from({ length: 16 }, (_, index) => ({
+      number: index + 1,
+      top: `${Math.floor(index / 4) * 100}px`,
+      left: `${(index % 4) * 100}px`,
+    }));
+    setPuzzle(initialPuzzle);
+  }, []);
 
   useEffect(() => {
     let interval = null;
@@ -22,32 +30,24 @@ const Tabuleiro = ({ imagem }) => {
     return () => clearInterval(interval);
   }, [isActive, seconds]);
 
-  const handleTileClick = (index) => {
-    const emptyTileIndex = puzzle.indexOf(16);
-    if (isTileMovable(index, emptyTileIndex)) {
-      const newPuzzle = [...puzzle];
-      newPuzzle[emptyTileIndex] = puzzle[index];
-      newPuzzle[index] = 16;
-      setPuzzle(newPuzzle);
+  const handleTileMouseDown = (index, event) => {
+    event.preventDefault();
+    setSelectedTile(index);
+  };
 
-      if (isPuzzleCompleted(newPuzzle)) {
-        handlePuzzleCompleted();
-      }
+  const handleTileMouseEnter = (index) => {
+    if (selectedTile !== null && selectedTile !== index) {
+      const newPuzzle = [...puzzle];
+      const selectedTileData = newPuzzle[selectedTile];
+      newPuzzle[selectedTile] = newPuzzle[index];
+      newPuzzle[index] = selectedTileData;
+      setPuzzle(newPuzzle);
+      setSelectedTile(index);
     }
   };
 
-  const isTileMovable = (tileIndex, emptyIndex) => {
-    const diff = Math.abs(tileIndex - emptyIndex);
-    return (diff === 1 && Math.floor(tileIndex / 4) === Math.floor(emptyIndex / 4)) || (diff === 4);
-  };
-
-  const isPuzzleCompleted = (puzzle) => {
-    return puzzle.every((tile, index) => (index === 15 ? tile === 16 : tile === index + 1));
-  };
-
-  const handlePuzzleCompleted = () => {
-    alert("Parabéns, você completou o desafio!");
-    setIsActive(false);
+  const handleTileMouseUp = () => {
+    setSelectedTile(null);
   };
 
   const handleStartTimer = () => {
@@ -71,9 +71,23 @@ const Tabuleiro = ({ imagem }) => {
       <h2>Vamos montar o quebra-cabeça: {imagem}</h2>
       <div className="quebra-cabeca">
         {puzzle.map((tile, index) => (
-          <div key={index} className="peca" onClick={() => handleTileClick(index)}>
-            {tile !== 16 && <img src={imagem} alt={`Peça ${tile}`} />}
-          </div>
+          <div
+            key={index}
+            className="peca"
+            onMouseDown={(event) => handleTileMouseDown(index, event)}
+            onMouseEnter={() => handleTileMouseEnter(index)}
+            onMouseUp={handleTileMouseUp}
+            style={{
+              backgroundImage: `url(${imagem})`,
+              backgroundPosition: `-${(tile.number - 1) % 4 * 100}px -${Math.floor(
+                (tile.number - 1) / 4
+              ) * 100}px`,
+              top: tile.top,
+              left: tile.left,
+              zIndex: selectedTile === index ? 1 : "auto",
+              border: selectedTile === index ? "2px solid #007bff" : "none",
+            }}
+          />
         ))}
       </div>
       <div className="cronometro">
