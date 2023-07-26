@@ -55,13 +55,27 @@ button {
     border: none;
     border-radius: 5px;
     background-color: #007bff;
-    color: #fff;
+    color: #10a017;
     cursor: pointer;
 }
 
 button:hover {
 background-color: #0056b3;
 }
+.mensagem-instrucao {
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+    font-size: 18px;
+    text-align: center;
+    margin-top: 20px;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 5px;
+}
+  
+  
 
 
 @media (max-width: 768px) {
