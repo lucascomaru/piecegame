@@ -3,11 +3,11 @@ import EscolherPuzzle from "./components/EscolherPuzzle";
 import Tabuleiro from "./components/Tabuleiro";
 
 const imagens = [
-  "./teste1.png",
-  "https://via.placeholder.com/150",
-  "https://via.placeholder.com/150",
-  "https://via.placeholder.com/150",
-  "https://via.placeholder.com/150",
+  "./naruto.jpeg",
+  "./tanjiro.jpg",
+  "./swordart.jpg",
+  "./dragonb.jpg",
+  "cavaleiros.jpg",
 ];
 
 const App = () => {

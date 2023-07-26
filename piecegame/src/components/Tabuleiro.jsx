@@ -2,52 +2,74 @@ import { useState, useEffect } from "react";
 import "./Tabuleiro.css";
 
 const Tabuleiro = ({ imagem }) => {
+  const initialPuzzle = Array.from({ length: 16 }, (_, index) => index);
+
   const [puzzle, setPuzzle] = useState([]);
   const [seconds, setSeconds] = useState(0);
   const [isActive, setIsActive] = useState(false);
-  const [selectedTile, setSelectedTile] = useState(null);
+  const [selectedTileIndex, setSelectedTileIndex] = useState(null);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [isPuzzleComplete, setIsPuzzleComplete] = useState(false);
+
+  const shufflePuzzle = () => {
+    const shuffledPuzzle = Array.from({ length: 16 }, (_, index) => index);
+    for (let i = shuffledPuzzle.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledPuzzle[i], shuffledPuzzle[j]] = [shuffledPuzzle[j], shuffledPuzzle[i]];
+    }
+    setPuzzle(shuffledPuzzle);
+    setIsPuzzleComplete(false);
+    setIsActive(true);
+    setSeconds(0);
+  };
 
   useEffect(() => {
-    const initialPuzzle = Array.from({ length: 16 }, (_, index) => ({
-      number: index + 1,
-      top: `${Math.floor(index / 4) * 100}px`,
-      left: `${(index % 4) * 100}px`,
-    }));
-    setPuzzle(initialPuzzle);
-  }, []);
+    shufflePuzzle();
+  }, [imagem]);
 
   useEffect(() => {
-    let interval = null;
-
     if (isActive) {
-      interval = setInterval(() => {
+      const interval = setInterval(() => {
         setSeconds((seconds) => seconds + 1);
       }, 1000);
-    } else if (!isActive && seconds !== 0) {
-      clearInterval(interval);
+
+      return () => clearInterval(interval);
     }
+  }, [isActive]);
 
-    return () => clearInterval(interval);
-  }, [isActive, seconds]);
-
-  const handleTileMouseDown = (index, event) => {
-    event.preventDefault();
-    setSelectedTile(index);
+  const handleTileClick = (index) => {
+    setSelectedTileIndex(index);
+    setOffset({ x: 0, y: 0 });
   };
 
-  const handleTileMouseEnter = (index) => {
-    if (selectedTile !== null && selectedTile !== index) {
+  const handleTileDragStart = (e, index) => {
+    setSelectedTileIndex(index);
+    setOffset({ x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY });
+  };
+
+  const handleTileDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleTileDrop = (e, index) => {
+    e.preventDefault();
+    const draggedTileIndex = selectedTileIndex;
+    if (draggedTileIndex !== null && draggedTileIndex !== index) {
       const newPuzzle = [...puzzle];
-      const selectedTileData = newPuzzle[selectedTile];
-      newPuzzle[selectedTile] = newPuzzle[index];
-      newPuzzle[index] = selectedTileData;
+      const draggedTileNumber = puzzle[draggedTileIndex];
+      newPuzzle[draggedTileIndex] = puzzle[index];
+      newPuzzle[index] = draggedTileNumber;
       setPuzzle(newPuzzle);
-      setSelectedTile(index);
+      setSelectedTileIndex(null);
+      if (isPuzzleCompleted(newPuzzle)) {
+        setIsPuzzleComplete(true);
+        setIsActive(false);
+      }
     }
   };
 
-  const handleTileMouseUp = () => {
-    setSelectedTile(null);
+  const isPuzzleCompleted = (puzzle) => {
+    return puzzle.every((tile, index) => (index === 15 ? tile === 15 : tile === index));
   };
 
   const handleStartTimer = () => {
@@ -65,27 +87,25 @@ const Tabuleiro = ({ imagem }) => {
 
   return (
     <div className="tabuleiro">
-      <button onClick={() => window.history.back()} className="voltar-button">
-        Voltar
-      </button>
-      <h2>Vamos montar o quebra-cabeça: {imagem}</h2>
+      <h2>Vamos montar o quebra-cabeça</h2>
       <div className="quebra-cabeca">
         {puzzle.map((tile, index) => (
           <div
             key={index}
             className="peca"
-            onMouseDown={(event) => handleTileMouseDown(index, event)}
-            onMouseEnter={() => handleTileMouseEnter(index)}
-            onMouseUp={handleTileMouseUp}
+            onClick={() => handleTileClick(index)}
+            draggable={true}
+            onDragStart={(e) => handleTileDragStart(e, index)}
+            onDragOver={handleTileDragOver}
+            onDrop={(e) => handleTileDrop(e, index)}
             style={{
               backgroundImage: `url(${imagem})`,
-              backgroundPosition: `-${(tile.number - 1) % 4 * 100}px -${Math.floor(
-                (tile.number - 1) / 4
-              ) * 100}px`,
-              top: tile.top,
-              left: tile.left,
-              zIndex: selectedTile === index ? 1 : "auto",
-              border: selectedTile === index ? "2px solid #007bff" : "none",
+              backgroundSize: "400% 400%",
+              backgroundPosition: `-${(tile % 4) * 100}% -${Math.floor(tile / 4) * 100}%`,
+              left: `${(index % 4) * 100}px`,
+              top: `${Math.floor(index / 4) * 100}px`,
+              zIndex: selectedTileIndex === index ? 1 : "auto",
+              position: "absolute",
             }}
           />
         ))}
@@ -99,6 +119,7 @@ const Tabuleiro = ({ imagem }) => {
         )}
         <button onClick={handleResetTimer}>Resetar Cronômetro</button>
       </div>
+      {isPuzzleComplete && <div className="mensagem">Parabéns, você completou o desafio!</div>}
     </div>
   );
 };
