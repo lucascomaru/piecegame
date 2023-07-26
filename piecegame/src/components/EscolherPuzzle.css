@@ -1,16 +1,3 @@
-body {
-    margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    place-items: center;
-    min-width: 320px;
-    min-height: 100vh;
-    background-image: url("./fundo1.jpg");
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-  }
 .escolher-puzzle {
     display: flex;
     flex-direction: column;
